@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/providers/auth-provider'
 import { useData } from '@/providers/data-provider'
 import { UserRole } from '@/types'
@@ -11,6 +12,7 @@ import { Plus, Eye, Edit, Trash2 } from 'lucide-react'
 import { useUser } from '@/features/tenants/hooks/userHooks'
 
 export default function TenantsPage() {
+  const router = useRouter()
   const { user } = useAuth()
   const { data: properties = [] }=useUser()
   const { tenants, deleteTenant } = useData()
@@ -80,7 +82,11 @@ export default function TenantsPage() {
       label: 'Actions',
       render: (id: string) => (
         <div className="flex gap-2">
-          <button className="p-1 hover:bg-secondary rounded text-muted-foreground hover:text-foreground transition-colors" title="View">
+          <button 
+            onClick={() => router.push(`/dashboard/tenants/${id}`)}
+            className="p-1 hover:bg-secondary rounded text-muted-foreground hover:text-foreground transition-colors" 
+            title="View"
+          >
             <Eye className="h-4 w-4" />
           </button>
           <button className="p-1 hover:bg-secondary rounded text-muted-foreground hover:text-foreground transition-colors" title="Edit">
