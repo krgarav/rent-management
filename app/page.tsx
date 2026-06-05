@@ -174,41 +174,6 @@ const handleLogin = (e: React.FormEvent) => {
               {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-card px-2 text-muted-foreground">
-                Demo Credentials
-              </span>
-            </div>
-          </div>
-
-          {/* Demo Credentials */}
-          <div className="space-y-2">
-            {demoCredentials.map((cred) => (
-              <button
-                key={cred.email}
-                type="button"
-                onClick={() => fillDemoCredentials(cred.email, cred.password)}
-                className="w-full rounded-lg border border-border bg-background p-3 text-left text-sm transition-all hover:bg-secondary"
-              >
-                <div className="font-medium text-foreground">{cred.role}</div>
-                <div className="text-xs text-muted-foreground">
-                  {cred.email}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Footer */}
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Click any demo credential above to auto-fill the form, then click
-            Sign In.
-          </p>
         </div>
       </div>
     </main>
