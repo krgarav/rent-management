@@ -24,14 +24,14 @@ const handleLogin = (e: React.FormEvent) => {
     setError("Please enter both email and password");
     return;
   }
-console.log(password)
+
   loginMutation(
     { email, password },
     {
       onSuccess: (data) => {
         // optional: store token/user
         // login(data)
-
+        login(data.user); 
         router.push("/dashboard");
       },
       onError: () => {
@@ -214,3 +214,4 @@ console.log(password)
     </main>
   );
 }
+
