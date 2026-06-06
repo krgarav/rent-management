@@ -9,13 +9,11 @@ import { DataTable } from '@/components/tables/data-table'
 import { SearchBar } from '@/components/inputs/search-bar'
 import { AddTenantModal } from '@/components/modals/add-tenant-modal'
 import { Plus, Eye, Edit, Trash2 } from 'lucide-react'
-import { useUser } from '@/features/tenants/hooks/userHooks'
 
 export default function TenantsPage() {
   const router = useRouter()
   const { user } = useAuth()
-  const { data: properties = [] }=useUser()
-  const { tenants, deleteTenant } = useData()
+  const { tenants, properties, deleteTenant } = useData()
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
 

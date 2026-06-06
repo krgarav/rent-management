@@ -5,6 +5,11 @@ export const registerUser = async (data: {
   name: string;
   email: string;
   password: string;
+  phone: number;
+  propertyId?: string;
+  rentAmount?: number;
+  leaseStartDate?: Date;
+  leaseEndDate?: Date;
   role: "admin" | "tenant" | "manager";
 }) => {
   const response = await api.post("/auth/register", data);

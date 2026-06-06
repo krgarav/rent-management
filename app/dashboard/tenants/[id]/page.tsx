@@ -40,12 +40,12 @@ export default function TenantDetailsPage() {
         // Fetch tenant details
         const tenantData = await getTenantById(tenantId)
         setTenant(tenantData)
-
+        console.log(tenantData)
         // Fetch transactions and rent payments in parallel
-        const [transactionsData, rentPaymentsData] = await Promise.all([
-          getTenantTransactions(tenantId).catch(() => []),
-          getRentPayments(tenantId).catch(() => [])
-        ])
+        // const [transactionsData, rentPaymentsData] = await Promise.all([
+        //   getTenantTransactions(tenantId).catch(() => []),
+        //   getRentPayments(tenantId).catch(() => [])
+        // ])
 
         setTransactions(transactionsData || [])
         setRentPayments(rentPaymentsData || [])
