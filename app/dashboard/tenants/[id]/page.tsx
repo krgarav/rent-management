@@ -47,8 +47,8 @@ export default function TenantDetailsPage() {
         //   getRentPayments(tenantId).catch(() => [])
         // ])
 
-        setTransactions(transactionsData || [])
-        setRentPayments(rentPaymentsData || [])
+        // setTransactions(transactionsData || [])
+        // setRentPayments(rentPaymentsData || [])
       } catch (err) {
         console.error('[v0] Error fetching tenant data:', err)
         setError('Failed to load tenant details. Please try again.')
@@ -73,7 +73,7 @@ export default function TenantDetailsPage() {
       </div>
     )
   }
-
+console.log(error)
   if (error || !tenant) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -160,7 +160,7 @@ export default function TenantDetailsPage() {
               </div>
 
               {/* Lease Start Date */}
-              <div className="flex items-start gap-3">
+              {/* <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-muted-foreground">Lease Start</p>
@@ -168,7 +168,7 @@ export default function TenantDetailsPage() {
                     {new Date(tenant.leaseStartDate).toLocaleDateString()}
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Lease End Date */}
               <div className="flex items-start gap-3">
@@ -176,7 +176,7 @@ export default function TenantDetailsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Lease End</p>
                   <p className="text-sm font-medium text-foreground">
-                    {new Date(tenant.leaseEndDate).toLocaleDateString()}
+                    {/* {new Date(tenant.leaseEndDate).toLocaleDateString()} */}
                   </p>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default function TenantDetailsPage() {
                 <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-muted-foreground">Monthly Rent</p>
-                  <p className="text-lg font-bold text-foreground">${tenant.rentAmount.toLocaleString()}</p>
+                  {/* <p className="text-lg font-bold text-foreground">${tenant.rentAmount.toLocaleString()}</p> */}
                 </div>
               </div>
             </div>

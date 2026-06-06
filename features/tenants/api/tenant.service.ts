@@ -16,6 +16,11 @@ export const registerUser = async (data: {
   return response.data;
 };
 
+export const getTenants = async () => {
+  const response = await api.get(`/users/tenants`);
+  return response.data;
+};
+
 
 export const getUserById = async (id: string) => {
   const response = await api.get(`/users/${id}`);
