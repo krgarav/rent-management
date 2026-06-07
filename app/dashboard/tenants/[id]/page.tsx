@@ -7,7 +7,8 @@ import { useAuth } from '@/providers/auth-provider'
 import { Tenant, PaymentStatus } from '@/types'
 import { ArrowLeft, Mail, Phone, Home, Calendar, DollarSign, AlertCircle } from 'lucide-react'
 import { StatusBadge } from '@/components/badges/status-badge'
-import { CreateTransactionModal } from '@/components/modals/add-transaction-modal'
+import { CreateBillModal, CreateTransactionModal } from '@/components/modals/add-transaction-modal'
+import { useBills } from '@/features/tenants/hooks/billhooks'
 
 interface Transaction {
   id: string
@@ -32,7 +33,8 @@ export default function TenantDetailsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false)
-
+  const { data: tenantBills = [] } = useBills(tenantId);
+  console.log("fgfdgdf", tenantBills)
   useEffect(() => {
     const fetchTenantData = async () => {
       try {
@@ -101,19 +103,52 @@ export default function TenantDetailsPage() {
 
   const overduePayments = rentPayments.filter((p) => p.status === PaymentStatus.OVERDUE).length
 
-  const allTransactions = [
-    ...rentPayments.map((payment) => ({
-      id: payment.id,
-      type: 'rent' as const,
-      description: `Rent Payment - ${new Date(payment.dueDate).toLocaleDateString()}`,
-      amount: payment.amount,
-      date: new Date(payment.dueDate),
-      status: payment.status as 'pending' | 'paid' | 'overdue',
-      dueDate: new Date(payment.dueDate),
-      paidDate: payment.paidDate ? new Date(payment.paidDate) : undefined
-    })),
-    ...(transactions || [])
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  // const allTransactions = [
+  //   ...tenantBills.map((payment) => ({
+  //     id: payment.id,
+  //     type: 'rent' as const,
+  //     description: `Rent Payment - ${new Date(payment.dueDate).toLocaleDateString()}`,
+  //     amount: payment.amount,
+  //     date: new Date(payment.dueDate),
+  //     status: payment.status as 'pending' | 'paid' | 'overdue',
+  //     dueDate: new Date(payment.dueDate),
+  //     paidDate: payment.paidDate ? new Date(payment.paidDate) : undefined
+  //   })),
+  //   ...(transactions || [])
+  // ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const allTransactions = tenantBills.map((bill) => {
+    const electricAmount = bill.electricBill?.amount ?? 0;
+    const rentAmount = bill.rent?.amount ?? 0;
+
+    return {
+      id: bill._id,
+      type: 'bill' as const,
+      description: `Bill - ${bill.month}`,
+      date: new Date(bill.createdAt),
+
+      // 💰 combined amount
+      amount: electricAmount + rentAmount,
+
+      // 📦 keep breakdown (useful for UI if needed)
+      breakdown: {
+        rent: rentAmount,
+        electric: electricAmount,
+      },
+
+      status:
+        bill.rent?.status === 'paid' &&
+          bill.electricBill?.status === 'paid'
+          ? 'paid'
+          : bill.rent?.status === 'overdue' ||
+            bill.electricBill?.status === 'overdue'
+            ? 'overdue'
+            : 'pending',
+
+      billPhotoUrl: bill.electricBill?.billPhotoUrl,
+    };
+  });
+
   const handleCreateTransaction = async (data: any) => {
     const transaction = {
       id: crypto.randomUUID(),
@@ -234,7 +269,6 @@ export default function TenantDetailsPage() {
           {/* Transactions and Payments Card */}
           <div className="lg:col-span-2">
             <div className="rounded-lg border border-border bg-card p-6">
-              <h2 className="text-xl font-bold text-foreground mb-6">Transaction History</h2>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-foreground">Transaction History</h2>
 
@@ -252,31 +286,63 @@ export default function TenantDetailsPage() {
                 </div>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {allTransactions.map((transaction) => (
+                  {allTransactions.map((bill) => (
                     <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      key={bill.id}
+                      className="p-4 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      {/* HEADER ROW */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                             <DollarSign className="h-4 w-4 text-primary" />
                           </div>
+
                           <div>
-                            <p className="text-sm font-medium text-foreground">{transaction.description}</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {bill.description}
+                            </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(transaction.date).toLocaleDateString()}
+                              {new Date(bill.date).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="text-sm font-bold text-foreground">${transaction.amount.toLocaleString()}</p>
-                          <StatusBadge status={transaction.status} />
+                          <p className="text-sm font-bold text-foreground">
+                            ${bill.amount.toLocaleString()}
+                          </p>
+                          <StatusBadge status={bill.status} />
                         </div>
                       </div>
+
+                      {/* BREAKDOWN SECTION */}
+                      <div className="grid grid-cols-2 gap-3 text-xs border-t border-border pt-3">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Rent</span>
+                          <span className="font-medium text-foreground">
+                            ${bill.breakdown?.rent?.toLocaleString() ?? 0}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Electric</span>
+                          <span className="font-medium text-foreground">
+                            ${bill.breakdown?.electric?.toLocaleString() ?? 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* OPTIONAL: BILL IMAGE */}
+                      {bill.billPhotoUrl && (
+                        <div className="mt-3">
+                          <img
+                            src={bill.billPhotoUrl}
+                            alt="bill"
+                            className="h-20 w-20 rounded-md object-cover border border-border"
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -286,10 +352,11 @@ export default function TenantDetailsPage() {
         </div>
       </div>
 
-      <CreateTransactionModal
+      <CreateBillModal
         isOpen={isTransactionModalOpen}
         onClose={() => setIsTransactionModalOpen(false)}
-        onCreate={handleCreateTransaction}
+        tenantId={tenantId}
+      // onCreate={handleCreateTransaction}
       />
     </>
   )
