@@ -2,10 +2,11 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { property, z } from 'zod'
 import { X } from 'lucide-react'
 import { useRegisterUser } from '@/features/tenants/hooks/userHooks'
 import toast from 'react-hot-toast'
+import { useProperties } from '@/features/tenants/hooks/propertyHooks'
 
 const tenantSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -18,6 +19,7 @@ const tenantSchema = z.object({
   role: z.enum(['admin', 'tenant'], {
     message: 'Please select a role',
   }),
+propertyId: z.string().min(1, 'Please select property')
 })
 
 type TenantFormData = z.infer<typeof tenantSchema>
@@ -33,6 +35,7 @@ export function AddTenantModal({
 }: AddTenantModalProps) {
   const { mutateAsync: registerUser, isPending } = useRegisterUser()
 
+  const { data: properties = [] } = useProperties()
   const {
     register,
     handleSubmit,
@@ -43,6 +46,7 @@ export function AddTenantModal({
   })
 
   const onSubmit = async (data: TenantFormData) => {
+    console.log("kjlkojl;",data)
     try {
       await registerUser({
         name: data.name,
@@ -50,6 +54,7 @@ export function AddTenantModal({
         phone: Number(data.phone),
         password: data.password,
         role: data.role,
+        propertyId: data.propertyId,
       })
 
       toast.success('User registered successfully')
@@ -64,7 +69,7 @@ export function AddTenantModal({
   }
 
   if (!isOpen) return null
-
+  console.log("dfdsf", properties)
   return (
     <>
       {/* Backdrop */}
@@ -172,6 +177,35 @@ export function AddTenantModal({
             )}
           </div>
 
+
+          {/* properties */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-foreground">
+              Property
+            </label>
+
+            <select
+              {...register('propertyId')}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+            >
+              <option value="">Select role</option>
+              {properties && (
+                properties.map(p => {
+                  return <option value={p._id}>{p.name}</option>
+                }
+
+                )
+              )}
+
+
+            </select>
+
+            {errors.propertyId && (
+              <p className="text-xs text-destructive">
+                {errors.propertyId.message}
+              </p>
+            )}
+          </div>
           {/* Password */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-foreground">
